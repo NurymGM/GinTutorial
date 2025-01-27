@@ -40,7 +40,7 @@ func getBooks(c *gin.Context) {
         c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Failed to fetch books"})
         return
     }
-    c.IndentedJSON(http.StatusOK, books)
+	c.HTML(http.StatusOK, "books.html", gin.H{"books": books})
 }
 
 func addBook(c *gin.Context) {
@@ -78,7 +78,7 @@ func bookByID(c *gin.Context) {
 		c.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "Error retrieving book"})
 		return
 	}
-	c.IndentedJSON(http.StatusOK, b)
+	c.HTML(http.StatusOK, "book.html", b)
 }
 
 func checkoutBook(c *gin.Context) {
@@ -103,7 +103,7 @@ func checkoutBook(c *gin.Context) {
 		return
 	}
 	b.Quantity-- 
-	c.IndentedJSON(http.StatusOK, b)
+	c.HTML(http.StatusOK, "checkout.html", b)
 }	
 
 func returnBook(c *gin.Context) {
@@ -124,7 +124,7 @@ func returnBook(c *gin.Context) {
 		return
 	}
 	b.Quantity++ 
-	c.IndentedJSON(http.StatusOK, b)
+	c.HTML(http.StatusOK, "return.html", b)
 }
 
 func main() {
@@ -134,6 +134,17 @@ func main() {
 	defer closeDB()
 	
 	router := gin.Default()
+
+	// Serve static files
+	router.Static("/static", "./static")
+
+	// Load HTML templates
+	router.LoadHTMLGlob("templates/*")
+
+	router.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
+
 	router.GET("/books", getBooks)
 	router.POST("/books", addBook)
 	router.DELETE("/books/:id", deleteBook)
