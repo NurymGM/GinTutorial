@@ -151,8 +151,8 @@ func main() {
 	router.POST("/books", addBook)
 	router.DELETE("/books/:id", deleteBook)
 	router.GET("/books/:id", bookByID)
-	router.PATCH("/books/:id/checkout", checkoutBook)
-	router.PATCH("/books/:id/return", returnBook)
+	router.PUT("/books/:id/checkout", checkoutBook)
+	router.PUT("/books/:id/return", returnBook)
 
 
 	port := os.Getenv("PORT")
