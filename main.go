@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -134,6 +135,7 @@ func main() {
 	defer closeDB()
 	
 	router := gin.Default()
+	router.Use(CORSMiddleware())
 
 	// Serve static files
 	router.Static("/static", "./static")
@@ -151,5 +153,29 @@ func main() {
 	router.GET("/books/:id", bookByID)
 	router.PATCH("/books/:id/checkout", checkoutBook)
 	router.PATCH("/books/:id/return", returnBook)
-	router.Run("localhost:8080")
+
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	if err := router.Run(":" + port); err != nil {
+		log.Panicf("error: %s", err)
+	}
+}
+
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
 }
